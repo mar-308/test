@@ -1,44 +1,44 @@
-<!DOCTYPE html>                                                               
-                                         
-  <html>                                                                        
-  <head>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
   <title>Mariana's Plants</title>
   <style>
+    .hidden {
+      display: none;
+    }
     nav {
-    display: flex;
-    gap: 20px;
-    padding: 16px;
-    background-color: white;
-    border-radius: 8px;
-    margin-bottom: 30px;
-    margin-left: -20px;
-    margin-right: -20px;
-  }
-
-    img {                                                                                                 
-    width: 50%;
-    border-radius: 50px;                                                                                
-    margin-bottom: 30px;
-       display: block;
-    margin-left: auto;
-    margin-right: auto;
-   
-  }    
-
+      display: flex;
+      gap: 20px;
+      padding: 16px;
+      background-color: white;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      margin-left: -20px;
+      margin-right: -20px;
+    }
+    img {
+      width: 50%;
+      border-radius: 50px;
+      margin-bottom: 30px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
     h1 {
-      color:pink; 
+      color: pink;
       font-size: 40px;
-      text-align:center;
+      text-align: center;
     }
     h2 {
-      color:coral;
+      color: coral;
       font-size: 30px;
-      text-align:center;
+      text-align: center;
       font-style: italic;
       margin-bottom: 5px;
+      margin-top: 40px;
     }
     p {
       color: darkgray;
@@ -46,46 +46,135 @@
       margin-bottom: 30px;
     }
     body {
-      background-color:#f8f7f1;
+      line-height: 1.6;
+      background-color: #f8f7f1;
       max-width: 800px;
-      margin: 0 auto;                                                                                     
+      margin: 0 auto;
       padding: 20px;
-      font-family:'Montserrat', sans-serif;      
+      font-family: 'Montserrat', sans-serif;
     }
     li {
       font-size: 20px;
     }
-    a{
-      color:#e399af;
+    a {
+      color: #e399af;
       font-weight: bold;
     }
-  </style>                                               
-  </head>
-  
-  
+    button {
+      background-color: #e399af;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 16px;
+      border: 2px solid #e399af;
+      border-radius: 8px;
+      margin-top: 10px;
+      box-sizing: border-box;
+    }
+    textarea {
+      width: 100%;
+      padding: 10px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 16px;
+      border: 2px solid #e399af;
+      border-radius: 8px;
+      margin-top: 10px;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
 
-
-
-
-
-
-
-  <body>
-     <nav>
+<body>
+  <nav>
     <a href="first-website.html">Home</a>
     <a href="care-tips.html">Care Tips</a>
-  </nav>      
+  </nav>
 
   <h1>Mariana's Plants</h1>
-  <img src="https://i.etsystatic.com/30676021/r/il/7a91ef/3171458224/il_1080xN.3171458224_5fts.jpg" alt="A beautiful plant">            
+  <img src="https://i.etsystatic.com/30676021/r/il/7a91ef/3171458224/il_1080xN.3171458224_5fts.jpg" alt="A beautiful plant">
   <p>This website will teach you how I take care of all the plants I have at home</p>
-    <h2>My favorite plants</h2>
+
+  <h2>My favorite plants</h2>
   <ul>
-    <li>Monsterra</li>
+    <li>Monstera</li>
     <li>Money Tree</li>
     <li>Fiddle Leaf Fig</li>
   </ul>
-   <a href="Care Tips.html" target="_blank">Care Tips</a>
-  </body>
 
-  </html>
+  <h2>What's your plant?</h2>
+  <input id="plantInput" type="text" placeholder="Type a plant name...">
+  <button id="plantButton">Check my plant</button>
+  <p id="plantMessage" class="hidden"></p>
+
+  <h2>Secret Plant Tip</h2>
+  <p id="secret" class="hidden">This is a secret plant tip!</p>
+  <button id="toggleButton">Show tip</button>
+
+  <h2>Share Your Feedback</h2>
+  <button id="feedbackButton">Give Feedback</button>
+  <div id="feedbackForm" class="hidden">
+    <textarea id="feedbackText" rows="4" placeholder="Write your feedback here..."></textarea>
+    <br>
+    <button id="submitFeedback">Submit</button>
+  </div>
+  <p id="thankYouMessage" class="hidden">Thank you for your feedback!</p>
+
+  <script>
+    let toggleButton = document.getElementById("toggleButton");
+    toggleButton.addEventListener("click", function() {
+      let secret = document.getElementById("secret");
+      secret.classList.toggle("hidden");
+      if (toggleButton.innerHTML === "Show tip") {
+        toggleButton.innerHTML = "Hide tip";
+      } else {
+        toggleButton.innerHTML = "Show tip";
+      }
+    });
+
+    let feedbackButton = document.getElementById("feedbackButton");
+    let feedbackForm = document.getElementById("feedbackForm");
+    let submitFeedback = document.getElementById("submitFeedback");
+    let thankYouMessage = document.getElementById("thankYouMessage");
+
+    feedbackButton.addEventListener("click", function() {
+      feedbackForm.classList.toggle("hidden");
+      if (feedbackButton.innerHTML === "Give Feedback") {
+        feedbackButton.innerHTML = "Close";
+      } else {
+        feedbackButton.innerHTML = "Give Feedback";
+      }
+    });
+
+    submitFeedback.addEventListener("click", function() {
+      feedbackForm.classList.add("hidden");
+      feedbackButton.classList.add("hidden");
+      thankYouMessage.classList.remove("hidden");
+    });
+
+    let plantButton = document.getElementById("plantButton");
+    plantButton.addEventListener("click", function() {
+      let input = document.getElementById("plantInput").value.toLowerCase();
+      let message = document.getElementById("plantMessage");
+
+      if (input === "monstera") {
+        message.innerHTML = "Great choice! Monsteras love indirect light.";
+      } else {
+        message.innerHTML = "Cool plant! Every plant deserves love.";
+      }
+
+      message.classList.remove("hidden");
+    });
+  </script>
+</body>
+
+</html>
