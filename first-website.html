@@ -94,6 +94,20 @@
   </style>
 </head>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <body>
   <nav>
     <a href="first-website.html">Home</a>
@@ -105,12 +119,7 @@
   <p>This website will teach you how I take care of all the plants I have at home</p>
 
   <h2>My favorite plants</h2>
-  <ul>
-    <li>Monstera</li>
-    <li>Money Tree</li>
-    <li>Fiddle Leaf Fig</li>
-  </ul>
-
+  <ul id="plantList"></ul> 
   <h2>What's your plant?</h2>
   <input id="plantInput" type="text" placeholder="Type a plant name...">
   <button id="plantButton">Check my plant</button>
@@ -130,6 +139,13 @@
   <p id="thankYouMessage" class="hidden">Thank you for your feedback!</p>
 
   <script>
+    let plants = ["Monstera", "Money Tree", "Fiddle Leaf Fig"];
+
+    let listElement = document.getElementById("plantList");
+    for (let plant of plants) {
+      listElement.innerHTML += "<li>" + plant + "</li>";
+    }
+
     let toggleButton = document.getElementById("toggleButton");
     toggleButton.addEventListener("click", function() {
       let secret = document.getElementById("secret");
@@ -161,19 +177,24 @@
       thankYouMessage.classList.remove("hidden");
     });
 
+    function checkPlant(name) {
+      let lowerPlants = plants.map(p => p.toLowerCase());
+      if (lowerPlants.includes(name)) {
+        return "Great choice! That's one of my favorites!";
+      } else {
+        return "Cool plant! Every plant deserves love.";
+      }
+    }
+
     let plantButton = document.getElementById("plantButton");
     plantButton.addEventListener("click", function() {
       let input = document.getElementById("plantInput").value.toLowerCase();
       let message = document.getElementById("plantMessage");
 
-      if (input === "monstera") {
-        message.innerHTML = "Great choice! Monsteras love indirect light.";
-      } else {
-        message.innerHTML = "Cool plant! Every plant deserves love.";
-      }
-
+      message.innerHTML = checkPlant(input);
       message.classList.remove("hidden");
     });
+
   </script>
 </body>
 
