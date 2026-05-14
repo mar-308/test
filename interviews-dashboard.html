@@ -43,6 +43,9 @@
     .view-toggle { display: flex; background: var(--bg); border-radius: 8px; padding: 3px; gap: 2px; }
     .vbtn { font-size: 13px; font-weight: 500; padding: 5px 14px; border-radius: 6px; cursor: pointer; border: none; background: none; color: var(--muted); transition: all .15s; }
     .vbtn.active { background: #fff; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+    .toolbar-right { display: flex; align-items: center; gap: 10px; }
+    .pending-btn { font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 6px; cursor: pointer; border: 1.5px solid #D97706; background: #FEF3C7; color: #92400E; transition: all .15s; }
+    .pending-btn.off { background: var(--bg); border-color: var(--border); color: var(--muted); }
 
     /* MAIN */
     .main { padding: 24px 32px; }
@@ -134,9 +137,12 @@
     <span class="clabel" id="clabel"></span>
     <span class="ccount" id="ccount"></span>
   </div>
-  <div class="view-toggle">
-    <button class="vbtn active" id="btn-kanban" onclick="setView('kanban')">⊞ Board</button>
-    <button class="vbtn" id="btn-table" onclick="setView('table')">≡ Table</button>
+  <div class="toolbar-right">
+    <button class="pending-btn" id="btn-pending" onclick="togglePending()">⏳ Pending Publication</button>
+    <div class="view-toggle">
+      <button class="vbtn active" id="btn-kanban" onclick="setView('kanban')">⊞ Board</button>
+      <button class="vbtn" id="btn-table" onclick="setView('table')">≡ Table</button>
+    </div>
   </div>
 </div>
 
@@ -488,7 +494,7 @@ const CLIENTS = [
 ];
 
 // ── ALL-CLIENTS VIRTUAL TAB ────────────────────────────────────
-// Inserted at index 0 after CLIENTS is defined.
+// Appended at the end after CLIENTS is defined.
 const ALL_TAB = {
   id:"all", name:"ALL CLIENTS", color:"#374151", icon:"⊞",
   url:"https://www.notion.so/jive-pr/INTERVIEWS-VISITS-2b58a40e7b748020a7f1fbe66960358d",
@@ -501,7 +507,7 @@ CLIENTS.forEach(c => c.sections.forEach(s => s.rows.forEach(r => {
   r._clientName  = c.name;
 })));
 ALL_TAB.sections[0].rows = CLIENTS.flatMap(c => c.sections.flatMap(s => s.rows));
-const ALL_CLIENTS = [ALL_TAB, ...CLIENTS];
+const ALL_CLIENTS = [...CLIENTS, ALL_TAB];
 
 // ── KANBAN COLUMN DEFINITIONS ──────────────────────────────────
 const KCOLS = [
@@ -514,13 +520,19 @@ const KCOLS = [
 ];
 
 // ── STATE ──────────────────────────────────────────────────────
-let ai = 0, view = "kanban";
+let ai = 0, view = "kanban", showPending = true;
 function curClient(){ return ALL_CLIENTS[ai]; }
 
 // ── HELPERS ────────────────────────────────────────────────────
 // g:4 = Published/Done, g:5 = Declined/Archived/Passed — always hidden
 const HIDDEN_GROUPS = new Set([4, 5]);
-function allRows(c){ return c.sections.flatMap(s=>s.rows).filter(r=>!HIDDEN_GROUPS.has(gs(r.status).g)); }
+function allRows(c){
+  return c.sections.flatMap(s=>s.rows).filter(r=>{
+    if(HIDDEN_GROUPS.has(gs(r.status).g)) return false;
+    if(!showPending && gs(r.status).g === 3) return false;
+    return true;
+  });
+}
 function clientBadge(r){
   if(!r._clientColor) return "";
   return `<span style="font-size:10px;font-weight:700;letter-spacing:.4px;padding:2px 7px;border-radius:3px;background:${r._clientColor}22;color:${r._clientColor};margin-right:4px">${r._clientName}</span>`;
@@ -550,6 +562,9 @@ function renderToolbar(){
   document.getElementById("ccount").textContent=`${n} ${n===1?"entry":"entries"}`;
   document.getElementById("btn-kanban").classList.toggle("active",view==="kanban");
   document.getElementById("btn-table").classList.toggle("active",view==="table");
+  const pb = document.getElementById("btn-pending");
+  pb.classList.toggle("off", !showPending);
+  pb.textContent = showPending ? "⏳ Pending Publication" : "⏳ Pending Publication (hidden)";
 }
 
 // ── CARD ───────────────────────────────────────────────────────
@@ -771,6 +786,7 @@ function render(){
 // ── ACTIONS ────────────────────────────────────────────────────
 function sel(i){ ai=i; render(); }
 function setView(v){ view=v; renderToolbar(); document.getElementById("main").innerHTML=v==="kanban"?renderKanban():renderTable(); }
+function togglePending(){ showPending=!showPending; render(); }
 
 render();
 </script>
