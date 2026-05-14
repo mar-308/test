@@ -97,6 +97,20 @@
     .sub-label { font-size: 11.5px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); margin: 24px 0 10px; }
     .sub-label:first-child { margin-top: 0; }
 
+    /* ALERTS PANEL */
+    .alerts-panel { background: #FFF7ED; border-bottom: 1px solid #FED7AA; padding: 14px 32px; }
+    .alerts-panel.hidden { display: none; }
+    .alerts-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .alerts-title { font-size: 13px; font-weight: 700; color: #9A3412; display: flex; align-items: center; gap: 6px; }
+    .alerts-dismiss { font-size: 12px; color: #9A3412; background: none; border: 1px solid #FED7AA; cursor: pointer; padding: 4px 10px; border-radius: 5px; }
+    .alerts-dismiss:hover { background: rgba(154,52,18,.08); }
+    .alert-item { display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid #FED7AA; font-size: 12.5px; align-items: flex-start; }
+    .alert-item:first-of-type { border-top: none; padding-top: 0; }
+    .alert-dot { width: 6px; height: 6px; border-radius: 50%; background: #EA580C; flex-shrink: 0; margin-top: 4px; }
+    .alert-client-chip { font-size: 10.5px; font-weight: 700; padding: 2px 6px; border-radius: 3px; flex-shrink: 0; white-space: nowrap; }
+    .alert-action { font-weight: 600; color: #7C2D12; }
+    .alert-detail { color: #6B7280; }
+
     /* EMPTY */
     .empty { text-align: center; padding: 56px 20px; color: var(--muted); }
     .empty h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
@@ -128,6 +142,8 @@
   <span>📡 To pull fresh data from Notion, ask Claude Code: <strong>"refresh the interviews dashboard"</strong></span>
   <a href="https://www.notion.so/jive-pr/INTERVIEWS-VISITS-2b58a40e7b748020a7f1fbe66960358d" target="_blank">View in Notion ↗</a>
 </div>
+
+<div id="alerts-panel" class="alerts-panel"></div>
 
 <div class="tabs" id="tabs"></div>
 
@@ -788,7 +804,62 @@ function sel(i){ ai=i; render(); }
 function setView(v){ view=v; renderToolbar(); document.getElementById("main").innerHTML=v==="kanban"?renderKanban():renderTable(); }
 function togglePending(){ showPending=!showPending; render(); }
 
+// ── SLACK ALERTS (pulled May 14, 2026) ────────────────────────
+const ALERTS = [
+  {
+    client:"EFM", color:"#2D6A4F",
+    outlet:"NJ Park Sharks",
+    action:"Follow up with EFM on ticket status",
+    detail:"Visit is May 16. Valeria asked May 11 — EFM hasn't responded yet about tickets."
+  },
+  {
+    client:"CODE NINJAS", color:"#7B2D8B",
+    outlet:"NBC Chicago",
+    action:"Confirm Ed as spokesperson — Jalila hasn't messaged him yet",
+    detail:"NBC moved to May 22 at 9 AM CT via Zoom. Video b-roll also needed."
+  },
+  {
+    client:"CODE NINJAS", color:"#7B2D8B",
+    outlet:"Fox 5 Atlanta",
+    action:"Waiting on client to confirm preferred date (week of May 18+)",
+    detail:"CRE sent May 13. 4 live broadcast segments/day — time-sensitive."
+  },
+  {
+    client:"CODE NINJAS", color:"#7B2D8B",
+    outlet:"CTV Halifax",
+    action:"Monitor: story ran May 14 — verify Code Ninjas was not mentioned",
+    detail:"Reporter was unresponsive. Story may have aired without CN."
+  },
+  {
+    client:"CODE NINJAS", color:"#7B2D8B",
+    outlet:"Pitch Flag",
+    action:"Jalila flagged: pitch CN AI program to MIT Tech Review / EdSurge / Wired",
+    detail:"Technical deep dive angle — no action taken yet."
+  },
+];
+
+function renderAlerts(){
+  const panel = document.getElementById("alerts-panel");
+  if(!panel || !ALERTS.length) return;
+  const items = ALERTS.map(a=>`
+    <div class="alert-item">
+      <div class="alert-dot"></div>
+      <span class="alert-client-chip" style="background:${a.color}22;color:${a.color}">${a.client}</span>
+      <div>
+        <span class="alert-action">${a.outlet} — ${a.action}.</span>
+        ${a.detail?` <span class="alert-detail">${a.detail}</span>`:""}
+      </div>
+    </div>`).join("");
+  panel.innerHTML = `
+    <div class="alerts-header">
+      <span class="alerts-title">🔔 Slack Alerts — Action Needed (${ALERTS.length})</span>
+      <button class="alerts-dismiss" onclick="document.getElementById('alerts-panel').classList.add('hidden')">Dismiss ✕</button>
+    </div>
+    ${items}`;
+}
+
 render();
+renderAlerts();
 </script>
 </body>
 </html>
