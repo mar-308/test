@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interviews + Visits — Jive PR</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #F5F4F0;
+      --surface: #FFFFFF;
+      --border: #E8E6E0;
+      --text: #1A1A2E;
+      --muted: #6B7280;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* HEADER */
+    .header { background: #fff; color: var(--text); padding: 20px 32px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+    .header h1 { font-size: 21px; font-weight: 700; letter-spacing: -.3px; }
+    .header p { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .sync-badge { font-size: 12px; color: var(--muted); background: var(--bg); padding: 6px 12px; border-radius: 6px; }
+    .notion-btn { font-size: 13px; font-weight: 500; color: var(--text); background: rgba(0,0,0,.05); border: 1px solid rgba(0,0,0,.12); padding: 7px 14px; border-radius: 8px; text-decoration: none; transition: background .15s; }
+    .notion-btn:hover { background: rgba(0,0,0,.1); }
+
+    /* BANNER */
+    .banner { background: #EFF6FF; border-bottom: 1px solid #BFDBFE; color: #1D4ED8; padding: 9px 32px; font-size: 12.5px; display: flex; justify-content: space-between; align-items: center; }
+    .banner a { color: #1D4ED8; font-weight: 600; text-decoration: none; }
+
+    /* TABS */
+    .tabs { background: var(--bg); padding: 0 32px; display: flex; gap: 2px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+    .tab { font-size: 12.5px; font-weight: 600; padding: 11px 16px; color: var(--muted); cursor: pointer; border-bottom: 2.5px solid transparent; transition: all .15s; white-space: nowrap; letter-spacing: .3px; }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--cc, var(--text)); border-bottom-color: var(--cc, var(--text)); }
+
+    /* TOOLBAR */
+    .toolbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 13px 32px; display: flex; justify-content: space-between; align-items: center; }
+    .client-info { display: flex; align-items: center; gap: 8px; }
+    .cdot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .clabel { font-size: 14px; font-weight: 700; letter-spacing: .3px; }
+    .ccount { font-size: 12px; color: var(--muted); background: var(--bg); padding: 3px 10px; border-radius: 20px; }
+    .view-toggle { display: flex; background: var(--bg); border-radius: 8px; padding: 3px; gap: 2px; }
+    .vbtn { font-size: 13px; font-weight: 500; padding: 5px 14px; border-radius: 6px; cursor: pointer; border: none; background: none; color: var(--muted); transition: all .15s; }
+    .vbtn.active { background: #fff; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+
+    /* MAIN */
+    .main { padding: 24px 32px; }
+
+    /* KANBAN */
+    .kanban { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 20px; }
+    .kcol { flex: 0 0 272px; background: #EEECE8; border-radius: 12px; padding: 14px; }
+    .kcol-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .kcol-title { font-size: 11.5px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; display: flex; align-items: center; gap: 6px; color: #374151; }
+    .kcdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .kccount { font-size: 12px; font-weight: 600; color: var(--muted); background: rgba(0,0,0,.06); padding: 2px 8px; border-radius: 20px; }
+
+    /* CARD */
+    .card { background: #fff; border-radius: 10px; padding: 14px; margin-bottom: 10px; border: 1px solid var(--border); transition: box-shadow .15s, transform .1s; }
+    .card:hover { box-shadow: 0 4px 14px rgba(0,0,0,.08); transform: translateY(-1px); }
+    .card-outlet { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+    .card-outlet a { color: inherit; text-decoration: none; }
+    .card-outlet a:hover { text-decoration: underline; }
+    .card-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+    .tag { font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 4px; }
+    .tag-date  { background: #F3F4F6; color: #374151; }
+    .tag-loc   { background: #EEF2FF; color: #4338CA; }
+    .tag-type  { background: #FDF4FF; color: #7E22CE; }
+    .tag-tier1 { background: #EFF6FF; color: #1D4ED8; }
+    .tag-tier2 { background: #F5F3FF; color: #6D28D9; }
+    .tag-tier3 { background: #F9FAFB; color: #6B7280; }
+    .tag-top   { background: #FFF1F2; color: #BE123C; }
+    .tag-med   { background: #FFFBEB; color: #92400E; }
+    .card-people { font-size: 12px; color: #374151; margin-top: 7px; }
+    .card-notes { font-size: 12px; color: var(--muted); margin-top: 7px; line-height: 1.45; }
+
+    /* STATUS BADGE */
+    .sbadge { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 5px; }
+    .sbadge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+    /* TABLE */
+    .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); background: #fff; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 11px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); background: #FAFAF8; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #FAFAF8; }
+    td.outlet { font-weight: 600; }
+    td.outlet a { color: inherit; text-decoration: none; }
+    td.outlet a:hover { text-decoration: underline; }
+    td.notes-cell { font-size: 12px; color: var(--muted); max-width: 240px; }
+
+    /* SUB LABEL */
+    .sub-label { font-size: 11.5px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); margin: 24px 0 10px; }
+    .sub-label:first-child { margin-top: 0; }
+
+    /* EMPTY */
+    .empty { text-align: center; padding: 56px 20px; color: var(--muted); }
+    .empty h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+    .empty p { font-size: 13.5px; }
+    .empty a { color: #1D4ED8; }
+
+    @media (max-width: 700px) {
+      .header, .toolbar, .main, .banner { padding-left: 16px; padding-right: 16px; }
+      .tabs { padding: 0 16px; }
+      .header { flex-wrap: wrap; gap: 10px; }
+      .header-right { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>🎙️ Interviews + Visits</h1>
+    <p>Jive PR + Digital &nbsp;·&nbsp; All active client boards</p>
+  </div>
+  <div class="header-right">
+    <span class="sync-badge">Synced: May 14, 2026</span>
+    <a class="notion-btn" href="https://www.notion.so/jive-pr/INTERVIEWS-VISITS-2b58a40e7b748020a7f1fbe66960358d" target="_blank">Open in Notion ↗</a>
+  </div>
+</div>
+
+<div class="banner">
+  <span>📡 To pull fresh data from Notion, ask Claude Code: <strong>"refresh the interviews dashboard"</strong></span>
+  <a href="https://www.notion.so/jive-pr/INTERVIEWS-VISITS-2b58a40e7b748020a7f1fbe66960358d" target="_blank">View in Notion ↗</a>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="toolbar">
+  <div class="client-info">
+    <div class="cdot" id="cdot"></div>
+    <span class="clabel" id="clabel"></span>
+    <span class="ccount" id="ccount"></span>
+  </div>
+  <div class="view-toggle">
+    <button class="vbtn active" id="btn-kanban" onclick="setView('kanban')">⊞ Board</button>
+    <button class="vbtn" id="btn-table" onclick="setView('table')">≡ Table</button>
+  </div>
+</div>
+
+<div class="main" id="main"></div>
+
+<script>
+// ── STATUS CONFIG ──────────────────────────────────────────────
+const SC = {
+  "Interested (Jive Gathering Info)": { c:"#92400E", bg:"#FEF3C7", g:0 },
+  "Interested / Getting Info":        { c:"#92400E", bg:"#FEF3C7", g:0 },
+  "Jive gathering info":              { c:"#92400E", bg:"#FEF3C7", g:0 },
+  "Jive Getting Info":                { c:"#92400E", bg:"#FEF3C7", g:0 },
+  "Let Grow to confirm":              { c:"#5B21B6", bg:"#EDE9FE", g:0 },
+  "Flyover to Confirm":               { c:"#1D4ED8", bg:"#DBEAFE", g:1 },
+  "Client to Schedule":               { c:"#1D4ED8", bg:"#DBEAFE", g:1 },
+  "Shared with EFM":                  { c:"#C2410C", bg:"#FED7AA", g:1 },
+  "Speaker to approve":               { c:"#1D4ED8", bg:"#DBEAFE", g:1 },
+  "Ready to submit!":                 { c:"#5B21B6", bg:"#EDE9FE", g:1 },
+  "Booked":                           { c:"#15803D", bg:"#DCFCE7", g:2 },
+  "Scheduled":                        { c:"#15803D", bg:"#DCFCE7", g:2 },
+  "Visited – Pending Publication":    { c:"#B45309", bg:"#FEF9C3", g:3 },
+  "Visited | Pending Publication":    { c:"#B45309", bg:"#FEF9C3", g:3 },
+  "Pending Publication":              { c:"#B45309", bg:"#FEF9C3", g:3 },
+  "Published":                        { c:"#374151", bg:"#F3F4F6", g:4 },
+  "Done":                             { c:"#374151", bg:"#F3F4F6", g:4 },
+  "Declined by client":               { c:"#BE123C", bg:"#FFE4E6", g:5 },
+  "Passed":                           { c:"#BE123C", bg:"#FFE4E6", g:5 },
+  "Archived":                         { c:"#6B7280", bg:"#F9FAFB", g:5 },
+  "Will re-target in Q3":             { c:"#6B7280", bg:"#F9FAFB", g:5 },
+};
+function gs(s){ return SC[s]||{c:"#6B7280",bg:"#F9FAFB",g:99}; }
+function badge(s){ const {c,bg}=gs(s); return `<span class="sbadge" style="color:${c};background:${bg}">${s}</span>`; }
+
+// ── DATA (synced May 14, 2026) ─────────────────────────────────
+// ALL_CLIENTS is built dynamically after CLIENTS is defined.
+const CLIENTS = [
+  {
+    id:"flyover", name:"FLYOVER", color:"#E05228", icon:"✈️",
+    url:"https://www.notion.so/22a8a40e7b748070b402c70c00b33f82",
+    sections:[
+      {
+        label:"🎫 Media Visits", type:"media-visit",
+        rows:[
+          { outlet:"MSN", status:"Booked", location:"Las Vegas",
+            date:"2026-07-06", time:"4:30 PM", totalGuests:7, reporter:"Jake Cain",
+            campaign:["General Media Visit"], notes:"Jive to follow up in July",
+            url:"https://www.notion.so/3288a40e7b74802aa530ff814e606619" },
+          { outlet:"ARENA Homme", status:"Flyover to Confirm", location:"Las Vegas",
+            date:"2026-05-27", time:"Afternoon", totalGuests:2, reporter:"Esta Kim (LVCVA Korea PR Rep)",
+            campaign:["General Media Visit"], notes:"Korean men's fashion & lifestyle mag (Circ. 100K + Singles Mag Circ. 80K). Media visit email sent to Flyover May 14.",
+            url:"https://www.notion.so/3608a40e7b74803ba3c1dbb921dc3704" },
+          { outlet:"Korean LVCVA (Group)", status:"Interested (Jive Gathering Info)", location:"Las Vegas",
+            date:"", time:"", totalGuests:null, reporter:"",
+            campaign:[], notes:"Jive to send CRE",
+            url:"https://www.notion.so/3608a40e7b748026979df17faba4a43e" },
+          { outlet:"Justin Plus Lauren (75K UVM)", status:"Visited – Pending Publication", location:"Vancouver",
+            date:"2026-05-06", time:"2 PM", totalGuests:2, reporter:"Lauren Yakiwchuk",
+            campaign:["General Media Visit"], notes:"",
+            url:"https://www.notion.so/3448a40e7b748048a276f16dbb94304e" },
+          { outlet:"LA Times", status:"Visited – Pending Publication", location:"Iceland",
+            date:"2026-05-06", time:"11 AM", totalGuests:null, reporter:"Jenny Peters",
+            campaign:["General Media Visit"], notes:"",
+            url:"https://www.notion.so/3508a40e7b74807aaf3ac5c6e7d25d78" },
+          { outlet:"TimeOut", status:"Visited – Pending Publication", location:"Vancouver",
+            date:"2026-03-19", time:"1 PM", totalGuests:2, reporter:"Mariana Mijares",
+            campaign:[], notes:"",
+            url:"https://www.notion.so/31c8a40e7b74803587ade7032d1fb7e2" },
+          { outlet:"Toronto Sun", status:"Visited – Pending Publication", location:"Vancouver",
+            date:"2026-03-03", time:"5 PM", totalGuests:2, reporter:"Donald Duench",
+            campaign:["General Media Visit"], notes:"",
+            url:"https://www.notion.so/3178a40e7b74804c9540e6cc46881415" },
+          { outlet:"Cho Sun (Korea)", status:"Visited – Pending Publication", location:"Las Vegas",
+            date:"2025-11-20", time:"12:45 PM", totalGuests:2, reporter:"Jae Lee",
+            campaign:["General Media Visit"], notes:"",
+            url:"https://www.notion.so/2a98a40e7b7480bbb404ed4899912042" },
+          { outlet:"Vancouverscape", status:"Published", location:"Vancouver",
+            date:"2026-04-24", time:"11 AM", totalGuests:2, reporter:"Ariane Colenbrander",
+            campaign:["Believe Chicago opening"], notes:"Flying Whale lunch menu",
+            url:"https://www.notion.so/3438a40e7b7480b1adbfe1eb3d817d1f" },
+          { outlet:"Yahoo! + Compliment Magazine", status:"Published", location:"Chicago",
+            date:"2026-03-28", time:"12 PM", totalGuests:2, reporter:"Lashaunta Moore",
+            campaign:["General Media Visit"], notes:"",
+            url:"https://www.notion.so/32f8a40e7b74809e9d98c93927a4a092" },
+          { outlet:"VITA Magazine", status:"Published", location:"Vancouver",
+            date:"2026-03-28", time:"6:15 PM", totalGuests:2, reporter:"Noa Nichol",
+            campaign:["Believe Chicago opening"], notes:"",
+            url:"https://www.notion.so/31a8a40e7b748006b4d2cded23632d7d" },
+          { outlet:"LVCVA Germany/Austria", status:"Published", location:"Las Vegas",
+            date:"2026-02-04", time:"10:30 AM", totalGuests:5, reporter:"Tina Schwertner",
+            campaign:["General Media Visit"], notes:"",
+            url:"https://www.notion.so/2ee8a40e7b748000bda6f17cc60daab9" },
+          { outlet:"F1 Mexico Group", status:"Published", location:"Las Vegas",
+            date:"2025-11-20", time:"10:45 AM", totalGuests:5, reporter:"Yessica Castillo",
+            campaign:["General Media Visit"], notes:"",
+            url:"https://www.notion.so/2ab8a40e7b74809cba9fea11f4d3cb89" },
+        ]
+      },
+      {
+        label:"🎙️ Interviews", type:"interview",
+        rows:[
+          { outlet:"Global News", status:"Visited | Pending Publication", location:"Vancouver",
+            date:"2026-04-16", time:"11 AM", interviewees:"Lisa + Dave",
+            campaign:["Interview"], notes:"What goes into each Flyover film; interview with filmmakers",
+            url:"https://www.notion.so/32d8a40e7b7480e9a2dbcc3d46594275" },
+          { outlet:"Chicago Sun Times", status:"Archived", location:"Chicago",
+            date:"", time:"", interviewees:"",
+            campaign:["Interview"], notes:"Loved the media assets on Believe Chicago; exploring behind-the-scenes angle",
+            url:"https://www.notion.so/32f8a40e7b7480379896ea28375db8bc" },
+          { outlet:"Chicago Tribune", status:"Archived", location:"Chicago",
+            date:"", time:"", interviewees:"",
+            campaign:["Interview"], notes:"Reporter out with flu; waiting for future opportunity",
+            url:"https://www.notion.so/32d8a40e7b7481a5a768ce06d7102fe6" },
+          { outlet:"NPR + The Screening Room Substack", status:"Archived", location:"Chicago",
+            date:"", time:"", interviewees:"",
+            campaign:["Interview"], notes:"Waiting for future opportunity — Jive to follow up Q3",
+            url:"https://www.notion.so/32d8a40e7b7481bf9c39d5bd5e109d98" },
+        ]
+      }
+    ]
+  },
+  {
+    id:"efm", name:"EFM", color:"#2D6A4F", icon:"🦕",
+    url:"https://www.notion.so/2b58a40e7b7480b98574c7cfb7f765fd",
+    sections:[
+      {
+        label:"🎙️ EFM Interviews + Visits", type:"efm",
+        rows:[
+          { outlet:"NJ Park Sharks", status:"Scheduled", location:"On-Site (EFM)",
+            date:"2026-05-16", time:"10:00 AM", reporter:"",
+            spokesperson:"", priority:null, nextStep:"",
+            url:"https://www.notion.so/35f8a40e7b7480e5932bf98020b8affb" },
+          { outlet:"CBS (Visit Only)", status:"Scheduled", location:"On-Site (EFM)",
+            date:"2026-05-16", time:"10:30 AM", reporter:"Ashley Johnson",
+            spokesperson:"", priority:null, nextStep:"",
+            url:"https://www.notion.so/3498a40e7b748000b83dec7e51e86295" },
+          { outlet:"National Geographic", status:"Scheduled", location:"Remote",
+            date:"2026-04-17", time:"1 PM EST", reporter:"Nicholas St. Fleur",
+            spokesperson:"Ken", priority:"Top-Tier", nextStep:"",
+            url:"https://www.notion.so/3348a40e7b7480c8a475d9d09af00f1d" },
+          { outlet:"Meetings Today", status:"Scheduled", location:"On-Site (EFM)",
+            date:"2026-03-20", time:"11 AM EST", reporter:"Jeff Heilman",
+            spokesperson:"", priority:"Medium", nextStep:"Send Q&A to EFM", url:null },
+          { outlet:"Theme Park Magazine", status:"Pending Publication", location:"On-Site (EFM)",
+            date:"2026-03-22", time:"", reporter:"", spokesperson:"", priority:null,
+            nextStep:"Confirm tickets and Spokesperson",
+            url:"https://www.notion.so/3228a40e7b7480df8639cd37fc73f268" },
+          { outlet:"PHL17", status:"Published", location:"In-Studio",
+            date:"2026-05-04", time:"8:30 EST", reporter:"", spokesperson:"Ken",
+            priority:null, nextStep:"", url:"https://www.notion.so/33c8a40e7b748009a65eedca910ffccb" },
+          { outlet:"SXSW Panel", status:"Published", location:"In-Studio",
+            date:"2026-03-15", time:"2:30 PM", reporter:"", spokesperson:"Ken",
+            priority:null, nextStep:"", url:null },
+          { outlet:"News 12", status:"Published", location:"On-Site (EFM)",
+            date:"2025-03-14", time:"", reporter:"Alexandra De Matos",
+            spokesperson:"Ken", priority:null, nextStep:"",
+            url:"https://www.notion.so/1b28a40e7b74805b8fc3ecc173b77e6e" },
+        ]
+      }
+    ]
+  },
+  {
+    id:"codeninjas", name:"CODE NINJAS", color:"#7B2D8B", icon:"🥷",
+    url:"https://www.notion.so/3438a40e7b7480ef93a5ee3d90d2bbfc",
+    sections:[
+      {
+        label:"🎙️ Interview Opportunities", type:"cn",
+        rows:[
+          { outlet:"Global News Halifax", status:"Interested / Getting Info", location:"Remote",
+            date:"2026-05-13", time:"TBD", interviewee:["Ed"],
+            type:["Interview"],
+            notes:"Date window May 13–15. TBD.",
+            url:"https://www.notion.so/3598a40e7b74806f8f39c4e954268c0c" },
+          { outlet:"NBC Chicago", status:"Interested / Getting Info", location:"Remote",
+            date:"2026-05-22", time:"~9 AM CT", interviewee:["Ed"],
+            type:["Interview","Media Visit"],
+            notes:"Zoom interview + video b-roll requested. Topic: smart AI use among kids. Ed strongly preferred as spokesperson. Mariana to update client about new date + remote request.",
+            url:"https://www.notion.so/3588a40e7b748084a76bdaa742abdec2" },
+          { outlet:"Fox 5 Atlanta", status:"Client to Schedule", location:"On-Site",
+            date:"", time:"~11:30am, 1:30pm, 2:30pm, 3:30pm (live segments)", interviewee:["Franchise Owner"],
+            type:["Interview"],
+            notes:"Live broadcast, 4 segments/day (~5 min each). Outreach email sent to client May 13 — preferred date week of May 18+.",
+            url:"https://www.notion.so/3608a40e7b748161bc4cf8719ce17358" },
+          { outlet:"Hypepotamus", status:"Client to Schedule", location:"Remote",
+            date:"2026-05-15", time:"2 PM ET", interviewee:["Ed"],
+            type:["Interview"],
+            notes:"",
+            url:"https://www.notion.so/3608a40e7b748021971cfcca1d7612e1" },
+          { outlet:"Forbes", status:"Pending Publication", location:"Remote",
+            date:"2026-04-16", time:"5 PM ET", interviewee:["Navin"],
+            type:["Interview"],
+            notes:"John Koetsier, Forbes Editor — preparing next generation for AI-driven world.",
+            url:"https://www.notion.so/32f8a40e7b7480f69f42f335b8c15c0c" },
+          { outlet:"The Independent", status:"Pending Publication", location:"Remote",
+            date:"2026-04-22", time:"", interviewee:["Navin"],
+            type:["Comment Opp"],
+            notes:"",
+            url:"https://www.notion.so/34b8a40e7b748080b5a5ffee33319a71" },
+          { outlet:"Business Insider", status:"Pending Publication", location:"Remote",
+            date:"2026-03-31", time:"10 AM ET", interviewee:["Ed"],
+            type:["Interview"],
+            notes:"The shift from consumer of technology to creator.",
+            url:"https://www.notion.so/6288a40e7b7482fb87e601c1aae4c047" },
+          { outlet:"CCX", status:"Pending Publication", location:"On-Site",
+            date:"2026-04-27", time:"TBD", interviewee:["Franchise Owner"],
+            type:["Interview"],
+            notes:"",
+            url:"https://www.notion.so/34b8a40e7b74809e97fffeba0e212766" },
+          { outlet:"Fox 5 DC", status:"Published", location:"On-Site",
+            date:"2026-05-11", time:"8 AM ET", interviewee:["Franchise Owner"],
+            type:["Interview"],
+            notes:"Spokesperson: Ramon",
+            url:"https://www.notion.so/3588a40e7b748046b930dfa1ae70fbf8" },
+          { outlet:"ATL Live", status:"Published", location:"On-Site",
+            date:"2026-04-27", time:"10 AM", interviewee:["Franchise Owner"],
+            type:["Interview"],
+            notes:"Schooled! Casting Call",
+            url:"https://www.notion.so/34b8a40e7b7480b7b837e081abfd220d" },
+          { outlet:"Rough Draft Atlanta", status:"Published", location:"On-Site",
+            date:"", time:"", interviewee:[],
+            type:["Interview"],
+            notes:"",
+            url:"https://www.notion.so/35a8a40e7b7480d09a04d8b81787b43e" },
+          { outlet:"NEON (Las Vegas Review Journal)", status:"Published", location:"",
+            date:"", time:"", interviewee:[],
+            type:["Interview"],
+            notes:"",
+            url:"https://www.notion.so/35a8a40e7b7480008e97d7d3343e8c27" },
+        ]
+      }
+    ]
+  },
+  {
+    id:"letgrow", name:"LET GROW", color:"#1D6FA4", icon:"🌱",
+    url:"https://www.notion.so/3258a40e7b748064b7a0d59e8a13362e",
+    sections:[
+      {
+        label:"🎙️ Interview Opportunities", type:"lg",
+        rows:[
+          { outlet:"OP ED: Teaching the Fun Out of Childhood", status:"Jive gathering info",
+            journalist:"", tier:"Tier 1", type:"Op-Ed", date:"", time:"",
+            notes:"Sent to Boston Globe — passed. Going to LA Times next.",
+            details:"",
+            url:"https://www.notion.so/34a8a40e7b748097b9eafcf576878370" },
+          { outlet:"Full-Tilt Parenting Podcast", status:"Jive gathering info",
+            journalist:"Debbie Reber", tier:"Tier 2", type:"Podcast", date:"", time:"",
+            notes:"",
+            details:"I really like Lenore's work and lens but would need to understand more about the angle.",
+            url:"https://www.notion.so/3128a40e7b748146bbe2f4ffc8141add" },
+          { outlet:"ChildPsych Podcast", status:"Jive gathering info",
+            journalist:"Tania Johnson", tier:"Tier 2", type:"Podcast", date:"", time:"",
+            notes:"Reach: 5K listeners per episode",
+            details:"Would be honored to host Lenore on ChildPsych Podcast.",
+            url:"https://www.notion.so/3588a40e7b7480e28d41f26dbb5cdd8b" },
+          { outlet:"Dr. Psych Mom Podcast", status:"Jive gathering info",
+            journalist:"Samantha Rodman", tier:"Tier 3", type:"Podcast", date:"", time:"",
+            notes:"Reach: 4K listeners per episode",
+            details:"She loves Lenore's work.",
+            url:"https://www.notion.so/3128a40e7b74817b99bece8d8a0f632c" },
+          { outlet:"The Hechinger Report", status:"Jive gathering info",
+            journalist:"Jackie Mader", tier:"Tier 3", type:"Book", date:"", time:"",
+            notes:"Reach: 157K",
+            details:"I would love to talk to Lenore — working on a book about childhood.",
+            url:"https://www.notion.so/3128a40e7b74805e90e1f3558377f54c" },
+          { outlet:"New Podcast by @henpecked_hal", status:"Jive gathering info",
+            journalist:"Henpecked Hal", tier:"Tier 3", type:"Inbound Request", date:"", time:"",
+            notes:"Reach: 193K",
+            details:"",
+            url:"https://www.notion.so/34a8a40e7b74807f8fcbdcacf5124e6f" },
+          { outlet:"Joyful Courage for Parenting Teens", status:"Pending Publication",
+            journalist:"Casey O'Roarty", tier:"Tier 2", type:"Podcast",
+            date:"2026-05-13", time:"4:15 PM EST",
+            notes:"Reach: 8K listeners/episode",
+            details:"Interview done.",
+            url:"https://www.notion.so/3128a40e7b74816ba599d782b7bab8eb" },
+          { outlet:"The Irish Independent", status:"Pending Publication",
+            journalist:"Kathy Donaghy", tier:"Tier 2", type:"Print/Online",
+            date:"2026-05-08", time:"9 AM EST", notes:"",
+            details:"",
+            url:"https://www.notion.so/3128a40e7b7480a3bb1ef7775741ff9d" },
+          { outlet:"The Ryan Vet Show", status:"Pending Publication",
+            journalist:"Ryan Vet", tier:"Tier 1", type:"Inbound Request", date:"", time:"",
+            notes:"",
+            details:"Lenore coordinating the interview.",
+            url:"https://www.notion.so/34a8a40e7b74806f9315c7582860cf76" },
+          { outlet:"SheKnows", status:"Pending Publication",
+            journalist:"Beth Greenfield", tier:"Tier 1", type:"Broadcast/Video",
+            date:"2026-04-13", time:"", notes:"",
+            details:"Video feature about independence in teenagers.",
+            url:"https://www.notion.so/34a8a40e7b748032a1b9c8ffd58084df" },
+          { outlet:"Business Insider", status:"Pending Publication",
+            journalist:"Ana Altcheck", tier:"Tier 1", type:"Print/Online",
+            date:"2026-04-13", time:"", notes:"",
+            details:"Jive has followed up.",
+            url:"https://www.notion.so/34a8a40e7b748065a524c22e3cfd81fe" },
+          { outlet:"Newsweek", status:"Pending Publication",
+            journalist:"Jack Beresford", tier:"Tier 1", type:"Print/Online",
+            date:"2026-03-13", time:"9 AM",
+            notes:"Reach: 53M",
+            details:"Trends & Culture reporter interested in Lenore's approach to parenting.",
+            url:"https://www.notion.so/3128a40e7b748067b708fa69da1cb6ee" },
+          { outlet:"Disconnected", status:"Pending Publication",
+            journalist:"Ben Forman", tier:"Tier 3", type:"Inbound Request",
+            date:"2026-04-24", time:"3 PM ET", notes:"",
+            details:"Documentary format",
+            url:"https://www.notion.so/3438a40e7b7480dcaa0cfd1bb058909d" },
+          { outlet:"The Healthy Family Show", status:"Pending Publication",
+            journalist:"Amir Brott", tier:"Tier 2", type:"Podcast", date:"", time:"",
+            notes:"",
+            details:"Amir previously interviewed Lenore for Positive Parenting podcast; a fan of her work.",
+            url:"https://www.notion.so/3128a40e7b7481cc837ad6117b41357b" },
+          { outlet:"Deseret News", status:"Done",
+            journalist:"Lois M. Collins", tier:"Tier 1", type:"Print/Online",
+            date:"2026-04-22", time:"",
+            notes:"Reach: 2.6M",
+            details:"",
+            url:"https://www.notion.so/3138a40e7b74805a95b0c557473da09a" },
+          { outlet:"92NY", status:"Will re-target in Q3",
+            journalist:"Susan", tier:"Tier 2", type:"Print/Online", date:"", time:"",
+            notes:"",
+            details:"Difficulty getting audience for parenting topics.",
+            url:"https://www.notion.so/32e8a40e7b748016be7ac4ef94c00b0e" },
+          { outlet:"The Guardian", status:"Will re-target in Q3",
+            journalist:"Emine Saner", tier:"Tier 1", type:"Print/Online", date:"", time:"",
+            notes:"",
+            details:"",
+            url:"https://www.notion.so/3128a40e7b7480078bffc1f90a9308dd" },
+          { outlet:"McClatchy / Woman's World", status:"Will re-target in Q3",
+            journalist:"Kelli Estes", tier:"Tier 1", type:"Speaking Opportunity",
+            date:"2026-03-23", time:"2 PM EST",
+            notes:"Reach: 1.2M",
+            details:"Fan of Lenore's work; Woman's World team loves it.",
+            url:"https://www.notion.so/3128a40e7b74811b8dd8ff31a0c711a7" },
+          { outlet:"Luke Garrett Films", status:"Passed",
+            journalist:"Luke Garrett", tier:"Tier 3", type:"Inbound Request", date:"", time:"",
+            notes:"",
+            details:"Passed — new platform launching; cautious about using Lenore's image.",
+            url:"https://www.notion.so/34a8a40e7b748023a5e6fe97162dffe6" },
+        ]
+      }
+    ]
+  },
+  {
+    id:"jivepr", name:"JIVE PR + DIGITAL", color:"#B5395A", icon:"⭐",
+    url:"https://www.notion.so/3438a40e7b74808e9fd7df19cec0bed1",
+    sections:[
+      { label:"🎙️ Interviews + Commentary Opps", type:"jp", rows:[] }
+    ]
+  }
+];
+
+// ── ALL-CLIENTS VIRTUAL TAB ────────────────────────────────────
+// Inserted at index 0 after CLIENTS is defined.
+const ALL_TAB = {
+  id:"all", name:"ALL CLIENTS", color:"#374151", icon:"⊞",
+  url:"https://www.notion.so/jive-pr/INTERVIEWS-VISITS-2b58a40e7b748020a7f1fbe66960358d",
+  _isAll: true,
+  sections:[{ label:"All", type:"all", rows:[] }]
+};
+// Tag every row with its parent client color + name for the all-clients view.
+CLIENTS.forEach(c => c.sections.forEach(s => s.rows.forEach(r => {
+  r._clientColor = c.color;
+  r._clientName  = c.name;
+})));
+ALL_TAB.sections[0].rows = CLIENTS.flatMap(c => c.sections.flatMap(s => s.rows));
+const ALL_CLIENTS = [ALL_TAB, ...CLIENTS];
+
+// ── KANBAN COLUMN DEFINITIONS ──────────────────────────────────
+const KCOLS = [
+  { g:0, label:"Gathering Info",      dot:"#D97706" },
+  { g:1, label:"In Progress",         dot:"#2563EB" },
+  { g:2, label:"Booked / Scheduled",  dot:"#16A34A" },
+  { g:3, label:"Pending Publication", dot:"#CA8A04" },
+  { g:4, label:"Published / Done",    dot:"#6B7280" },
+  { g:5, label:"Declined / Archived", dot:"#DC2626" },
+];
+
+// ── STATE ──────────────────────────────────────────────────────
+let ai = 0, view = "kanban";
+function curClient(){ return ALL_CLIENTS[ai]; }
+
+// ── HELPERS ────────────────────────────────────────────────────
+function allRows(c){ return c.sections.flatMap(s=>s.rows); }
+function clientBadge(r){
+  if(!r._clientColor) return "";
+  return `<span style="font-size:10px;font-weight:700;letter-spacing:.4px;padding:2px 7px;border-radius:3px;background:${r._clientColor}22;color:${r._clientColor};margin-right:4px">${r._clientName}</span>`;
+}
+function fmtDate(d){
+  if(!d) return "";
+  const m = d.match(/^(\d{4})-(\d{2})$/);
+  if(m){ const dt=new Date(d+"-01"); return dt.toLocaleDateString("en-US",{month:"short",year:"numeric"}); }
+  const dt = new Date(d);
+  if(isNaN(dt)) return d;
+  return dt.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+}
+
+// ── RENDER TABS ────────────────────────────────────────────────
+function renderTabs(){
+  document.getElementById("tabs").innerHTML = ALL_CLIENTS.map((c,i)=>`
+    <div class="tab ${i===ai?"active":""}" style="--cc:${c.color}" onclick="sel(${i})">
+      ${c.icon} ${c.name}
+    </div>`).join("");
+}
+
+// ── RENDER TOOLBAR ─────────────────────────────────────────────
+function renderToolbar(){
+  const c=curClient(), n=allRows(c).length;
+  document.getElementById("cdot").style.background=c.color;
+  document.getElementById("clabel").textContent=c.name;
+  document.getElementById("ccount").textContent=`${n} ${n===1?"entry":"entries"}`;
+  document.getElementById("btn-kanban").classList.toggle("active",view==="kanban");
+  document.getElementById("btn-table").classList.toggle("active",view==="table");
+}
+
+// ── CARD ───────────────────────────────────────────────────────
+function card(r){
+  const dt = fmtDate(r.date);
+  const dateTag  = dt ? `<span class="tag tag-date">📅 ${dt}${r.time?" · "+r.time:""}</span>` : (r.time?`<span class="tag tag-date">🕐 ${r.time}</span>`:"");
+  const locTag   = r.location ? `<span class="tag tag-loc">📍 ${r.location}</span>` : "";
+  const typeArr  = r.type ? (Array.isArray(r.type)?r.type:[r.type]) : [];
+  const typeTags = typeArr.map(t=>`<span class="tag tag-type">${t}</span>`).join("");
+  const priTag   = r.priority==="Top-Tier"?`<span class="tag tag-top">★ Top-Tier</span>`
+                 : r.priority==="Medium"?`<span class="tag tag-med">Med</span>`:"";
+  const tierTag  = r.tier==="Tier 1"?`<span class="tag tag-tier1">Tier 1</span>`
+                 : r.tier==="Tier 2"?`<span class="tag tag-tier2">Tier 2</span>`
+                 : r.tier==="Tier 3"?`<span class="tag tag-tier3">Tier 3</span>`:"";
+
+  const ppl = [
+    r.interviewees,
+    Array.isArray(r.interviewee)?r.interviewee.join(", "):r.interviewee,
+    r.reporter, r.spokesperson, r.journalist, r.speaker
+  ].filter(Boolean);
+  const peopleHtml = ppl.length ? `<div class="card-people">👤 ${ppl.join(" · ")}</div>` : "";
+
+  const notesTxt = r.notes||r.details||r.nextStep||"";
+  const notesHtml = notesTxt ? `<div class="card-notes">${notesTxt}</div>` : "";
+
+  const outletHtml = r.url
+    ? `<div class="card-outlet"><a href="${r.url}" target="_blank">${r.outlet} ↗</a></div>`
+    : `<div class="card-outlet">${r.outlet}</div>`;
+
+  const cam = r.campaign ? r.campaign.join(", ") : "";
+  const camTag = cam ? `<span class="tag tag-date">${cam}</span>` : "";
+
+  return `<div class="card">
+    ${outletHtml}
+    ${clientBadge(r)}${badge(r.status)}
+    <div class="card-meta">${dateTag}${locTag}${typeTags}${priTag}${tierTag}${camTag}</div>
+    ${peopleHtml}
+    ${notesHtml}
+  </div>`;
+}
+
+// ── KANBAN ─────────────────────────────────────────────────────
+function renderKanban(){
+  const rows = allRows(curClient());
+  if(!rows.length) return emptyState();
+  const grouped={};
+  rows.forEach(r=>{ const g=gs(r.status).g; (grouped[g]=grouped[g]||[]).push(r); });
+  const cols = KCOLS.filter(k=>grouped[k.g]?.length);
+  if(!cols.length) return emptyState();
+  return `<div class="kanban">`+cols.map(k=>{
+    const cr=grouped[k.g];
+    return `<div class="kcol">
+      <div class="kcol-head">
+        <div class="kcol-title"><div class="kcdot" style="background:${k.dot}"></div>${k.label}</div>
+        <span class="kccount">${cr.length}</span>
+      </div>
+      ${cr.map(card).join("")}
+    </div>`;
+  }).join("")+`</div>`;
+}
+
+// ── TABLE: ALL CLIENTS ─────────────────────────────────────────
+function tAll(rows){
+  return `<div class="table-wrap"><table>
+    <thead><tr><th>Client</th><th>Outlet</th><th>Status</th><th>Location</th><th>Date</th><th>Time</th><th>People</th><th>Notes</th></tr></thead>
+    <tbody>${rows.map(r=>{
+      const ppl=[r.interviewees,Array.isArray(r.interviewee)?r.interviewee.join(", "):r.interviewee,r.reporter,r.spokesperson,r.journalist].filter(Boolean).join(", ")||"—";
+      const notesTxt=r.notes||r.details||r.nextStep||"—";
+      return `<tr>
+        <td><span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:3px;background:${r._clientColor}22;color:${r._clientColor}">${r._clientName}</span></td>
+        <td class="outlet">${r.url?`<a href="${r.url}" target="_blank">${r.outlet} ↗</a>`:r.outlet}</td>
+        <td>${badge(r.status)}</td>
+        <td>${r.location||"—"}</td>
+        <td>${fmtDate(r.date)||"—"}</td>
+        <td>${r.time||"—"}</td>
+        <td>${ppl}</td>
+        <td class="notes-cell">${notesTxt}</td>
+      </tr>`;
+    }).join("")}</tbody>
+  </table></div>`;
+}
+
+// ── TABLE: FLYOVER ─────────────────────────────────────────────
+function tFlyover(){
+  let html="";
+  for(const sec of curClient().sections){
+    if(!sec.rows.length) continue;
+    html+=`<div class="sub-label">${sec.label}</div>`;
+    if(sec.type==="media-visit"){
+      html+=`<div class="table-wrap"><table>
+        <thead><tr><th>Outlet</th><th>Status</th><th>Location</th><th>Date</th><th>Time</th><th>Guests</th><th>Campaign</th><th>Notes</th></tr></thead>
+        <tbody>${sec.rows.map(r=>`<tr>
+          <td class="outlet">${r.url?`<a href="${r.url}" target="_blank">${r.outlet} ↗</a>`:r.outlet}</td>
+          <td>${badge(r.status)}</td>
+          <td>${r.location||"—"}</td>
+          <td>${fmtDate(r.date)||"—"}</td>
+          <td>${r.time||"—"}</td>
+          <td>${r.totalGuests||"—"}</td>
+          <td>${(r.campaign||[]).join(", ")||"—"}</td>
+          <td class="notes-cell">${r.notes||"—"}</td>
+        </tr>`).join("")}</tbody>
+      </table></div>`;
+    } else {
+      html+=`<div class="table-wrap"><table>
+        <thead><tr><th>Outlet</th><th>Status</th><th>Location</th><th>Date</th><th>Time</th><th>Interviewees</th><th>Campaign</th><th>Notes</th></tr></thead>
+        <tbody>${sec.rows.map(r=>`<tr>
+          <td class="outlet">${r.url?`<a href="${r.url}" target="_blank">${r.outlet} ↗</a>`:r.outlet}</td>
+          <td>${badge(r.status)}</td>
+          <td>${r.location||"—"}</td>
+          <td>${fmtDate(r.date)||"—"}</td>
+          <td>${r.time||"—"}</td>
+          <td>${r.interviewees||"—"}</td>
+          <td>${(r.campaign||[]).join(", ")||"—"}</td>
+          <td class="notes-cell">${r.notes||"—"}</td>
+        </tr>`).join("")}</tbody>
+      </table></div>`;
+    }
+  }
+  return html;
+}
+
+// ── TABLE: EFM ─────────────────────────────────────────────────
+function tEFM(rows){
+  return `<div class="table-wrap"><table>
+    <thead><tr><th>Outlet</th><th>Status</th><th>Priority</th><th>Location</th><th>Date</th><th>Time</th><th>Reporter</th><th>Spokesperson</th><th>Next Step</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr>
+      <td class="outlet">${r.url?`<a href="${r.url}" target="_blank">${r.outlet} ↗</a>`:r.outlet}</td>
+      <td>${badge(r.status)}</td>
+      <td>${r.priority==="Top-Tier"?`<span class="tag tag-top">★ Top-Tier</span>`:r.priority==="Medium"?`<span class="tag tag-med">Medium</span>`:"—"}</td>
+      <td>${r.location||"—"}</td>
+      <td>${fmtDate(r.date)||"—"}</td>
+      <td>${r.time||"—"}</td>
+      <td>${r.reporter||"—"}</td>
+      <td>${r.spokesperson||"—"}</td>
+      <td class="notes-cell">${r.nextStep||"—"}</td>
+    </tr>`).join("")}</tbody>
+  </table></div>`;
+}
+
+// ── TABLE: CODE NINJAS ─────────────────────────────────────────
+function tCN(rows){
+  return `<div class="table-wrap"><table>
+    <thead><tr><th>Outlet</th><th>Status</th><th>Type</th><th>Location</th><th>Date</th><th>Time</th><th>Interviewee</th><th>Request / Notes</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr>
+      <td class="outlet">${r.url?`<a href="${r.url}" target="_blank">${r.outlet} ↗</a>`:r.outlet}</td>
+      <td>${badge(r.status)}</td>
+      <td>${(Array.isArray(r.type)?r.type:[r.type]).filter(Boolean).map(t=>`<span class="tag tag-type">${t}</span>`).join(" ")||"—"}</td>
+      <td>${r.location||"—"}</td>
+      <td>${fmtDate(r.date)||"—"}</td>
+      <td>${r.time||"—"}</td>
+      <td>${(Array.isArray(r.interviewee)?r.interviewee:[r.interviewee]).filter(Boolean).join(", ")||"—"}</td>
+      <td class="notes-cell">${r.notes||"—"}</td>
+    </tr>`).join("")}</tbody>
+  </table></div>`;
+}
+
+// ── TABLE: LET GROW ────────────────────────────────────────────
+function tLG(rows){
+  return `<div class="table-wrap"><table>
+    <thead><tr><th>Media Outlet</th><th>Status</th><th>Tier</th><th>Type</th><th>Date</th><th>Time</th><th>Journalist</th><th>Details</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr>
+      <td class="outlet">${r.url?`<a href="${r.url}" target="_blank">${r.outlet} ↗</a>`:r.outlet}</td>
+      <td>${badge(r.status)}</td>
+      <td>${r.tier==="Tier 1"?`<span class="tag tag-tier1">Tier 1</span>`:r.tier==="Tier 2"?`<span class="tag tag-tier2">Tier 2</span>`:r.tier==="Tier 3"?`<span class="tag tag-tier3">Tier 3</span>`:"—"}</td>
+      <td><span class="tag">${r.type||"—"}</span></td>
+      <td>${fmtDate(r.date)||"—"}</td>
+      <td>${r.time||"—"}</td>
+      <td>${r.journalist||"—"}</td>
+      <td class="notes-cell">${r.details||r.notes||"—"}</td>
+    </tr>`).join("")}</tbody>
+  </table></div>`;
+}
+
+// ── TABLE: JIVE PR ─────────────────────────────────────────────
+function tJP(rows){
+  if(!rows.length) return emptyState();
+  return `<div class="table-wrap"><table>
+    <thead><tr><th>Media Outlet</th><th>Status</th><th>Type</th><th>Date</th><th>Time</th><th>Speaker</th><th>Topic</th><th>Details / Feedback</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr>
+      <td class="outlet">${r.outlet}</td>
+      <td>${badge(r.status)}</td>
+      <td>${r.type||"—"}</td>
+      <td>${fmtDate(r.date)||"—"}</td>
+      <td>${r.time||"—"}</td>
+      <td>${r.speaker||"—"}</td>
+      <td class="notes-cell">${r.topic||"—"}</td>
+      <td class="notes-cell">${r.details||"—"}</td>
+    </tr>`).join("")}</tbody>
+  </table></div>`;
+}
+
+// ── TABLE ROUTER ───────────────────────────────────────────────
+function renderTable(){
+  const c=curClient(), rows=allRows(c);
+  if(c.id==="all")        return tAll(rows);
+  if(c.id==="flyover")    return tFlyover();
+  if(c.id==="efm")        return rows.length?tEFM(rows):emptyState();
+  if(c.id==="codeninjas") return rows.length?tCN(rows):emptyState();
+  if(c.id==="letgrow")    return rows.length?tLG(rows):emptyState();
+  if(c.id==="jivepr")     return tJP(rows);
+  return emptyState();
+}
+
+// ── EMPTY STATE ────────────────────────────────────────────────
+function emptyState(){
+  const c=curClient();
+  return `<div class="empty">
+    <h3>No entries synced yet</h3>
+    <p>Ask Claude Code: <strong>"refresh the interviews dashboard"</strong><br>or <a href="${c.url}" target="_blank">open in Notion ↗</a></p>
+  </div>`;
+}
+
+// ── RENDER ─────────────────────────────────────────────────────
+function render(){
+  renderTabs(); renderToolbar();
+  document.getElementById("main").innerHTML = view==="kanban" ? renderKanban() : renderTable();
+}
+
+// ── ACTIONS ────────────────────────────────────────────────────
+function sel(i){ ai=i; render(); }
+function setView(v){ view=v; renderToolbar(); document.getElementById("main").innerHTML=v==="kanban"?renderKanban():renderTable(); }
+
+render();
+</script>
+</body>
+</html>
