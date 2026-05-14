@@ -518,7 +518,9 @@ let ai = 0, view = "kanban";
 function curClient(){ return ALL_CLIENTS[ai]; }
 
 // ── HELPERS ────────────────────────────────────────────────────
-function allRows(c){ return c.sections.flatMap(s=>s.rows); }
+// g:4 = Published/Done, g:5 = Declined/Archived/Passed — always hidden
+const HIDDEN_GROUPS = new Set([4, 5]);
+function allRows(c){ return c.sections.flatMap(s=>s.rows).filter(r=>!HIDDEN_GROUPS.has(gs(r.status).g)); }
 function clientBadge(r){
   if(!r._clientColor) return "";
   return `<span style="font-size:10px;font-weight:700;letter-spacing:.4px;padding:2px 7px;border-radius:3px;background:${r._clientColor}22;color:${r._clientColor};margin-right:4px">${r._clientName}</span>`;
